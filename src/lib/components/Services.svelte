@@ -10,7 +10,17 @@
 
 	onMount(async () => {
 		try {
-			services = await sanityClient.getServices();
+			const fetchedServices = await sanityClient.getServices();
+			// Remove duplicates based on title (case-insensitive)
+			const seen = new Set<string>();
+			services = fetchedServices.filter((service) => {
+				const key = service.title.toLowerCase().trim();
+				if (seen.has(key)) {
+					return false;
+				}
+				seen.add(key);
+				return true;
+			});
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load services';
 			console.error('Error loading services:', e);
