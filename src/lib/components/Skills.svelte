@@ -10,7 +10,31 @@
 
 	onMount(async () => {
 		try {
-			skillCategories = await sanityClient.getSkills();
+			const fetchedCategories = await sanityClient.getSkills();
+			// Remove duplicate categories based on title (case-insensitive)
+			const seen = new Set<string>();
+			skillCategories = fetchedCategories
+				.filter((category) => {
+					const key = category.title.toLowerCase().trim();
+					if (seen.has(key)) {
+						return false;
+					}
+					seen.add(key);
+					return true;
+				})
+				.map((category) => {
+					// Also deduplicate skills within each category
+					const uniqueSkills = Array.from(
+						new Set(category.skills.map((skill) => skill.toLowerCase().trim()))
+					).map((skill) => {
+						// Find the original skill (preserving original case)
+						return category.skills.find((s) => s.toLowerCase().trim() === skill) || skill;
+					});
+					return {
+						...category,
+						skills: uniqueSkills,
+					};
+				});
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to load skills';
 			console.error('Error loading skills:', e);
