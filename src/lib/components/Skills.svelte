@@ -12,9 +12,14 @@
 		try {
 			const fetchedCategories = await sanityClient.getSkills();
 			// Remove duplicate categories based on title (case-insensitive)
+			// Also filter out categories with null/undefined titles
 			const seen = new Set<string>();
 			skillCategories = fetchedCategories
 				.filter((category) => {
+					// Skip categories with null/undefined titles
+					if (!category?.title) {
+						return false;
+					}
 					const key = category.title.toLowerCase().trim();
 					if (seen.has(key)) {
 						return false;
@@ -23,12 +28,13 @@
 					return true;
 				})
 				.map((category) => {
-					// Also deduplicate skills within each category
+					// Filter out null/undefined skills and deduplicate skills within each category
+					const validSkills = (category.skills || []).filter((skill) => skill != null);
 					const uniqueSkills = Array.from(
-						new Set(category.skills.map((skill) => skill.toLowerCase().trim()))
+						new Set(validSkills.map((skill) => String(skill).toLowerCase().trim()))
 					).map((skill) => {
 						// Find the original skill (preserving original case)
-						return category.skills.find((s) => s.toLowerCase().trim() === skill) || skill;
+						return validSkills.find((s) => String(s).toLowerCase().trim() === skill) || skill;
 					});
 					return {
 						...category,

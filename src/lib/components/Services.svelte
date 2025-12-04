@@ -12,8 +12,13 @@
 		try {
 			const fetchedServices = await sanityClient.getServices();
 			// Remove duplicates based on title (case-insensitive)
+			// Also filter out services with null/undefined titles
 			const seen = new Set<string>();
 			services = fetchedServices.filter((service) => {
+				// Skip services with null/undefined titles
+				if (!service?.title) {
+					return false;
+				}
 				const key = service.title.toLowerCase().trim();
 				if (seen.has(key)) {
 					return false;
