@@ -113,6 +113,15 @@ Deno.serve(async (req) => {
 				data = footer;
 				break;
 			}
+			case 'siteSettings': {
+				const settings = await client.fetch(
+					`*[_type == "siteSettings"][0]{
+						title
+					}`
+				);
+				data = settings;
+				break;
+			}
 			case 'navigation': {
 				const navigation = await client.fetch(
 					`*[_type == "navigation"][0]{
@@ -128,7 +137,7 @@ Deno.serve(async (req) => {
 			}
 			case 'all': {
 				// Fetch all content types in parallel
-				const [hero, about, services, skills, contact, footer, navigation] = await Promise.all([
+				const [hero, siteSettings, about, services, skills, contact, footer, navigation] = await Promise.all([
 					client.fetch(
 						`*[_type == "hero"][0]{
 							title,
@@ -137,6 +146,7 @@ Deno.serve(async (req) => {
 							ctaText
 						}`
 					),
+					client.fetch(`*[_type == "siteSettings"][0]{ title }`),
 					client.fetch(`*[_type == "about"][0]{ content }`),
 					client.fetch(
 						`*[_type == "service"] | order(order asc){
@@ -174,6 +184,7 @@ Deno.serve(async (req) => {
 
 				data = {
 					hero,
+					siteSettings,
 					about,
 					services,
 					skills,

@@ -46,6 +46,10 @@ export interface NavigationItem {
 	order: number;
 }
 
+export interface SiteSettings {
+	title: string;
+}
+
 async function fetchFromEdgeFunction<T>(type: string): Promise<T> {
 	if (!SUPABASE_URL) {
 		throw new Error('VITE_SUPABASE_URL is not configured');
@@ -100,6 +104,10 @@ export const sanityClient = {
 		return fetchFromEdgeFunction<NavigationItem[]>('navigation');
 	},
 
+	async getSiteSettings(): Promise<SiteSettings> {
+		return fetchFromEdgeFunction<SiteSettings>('siteSettings');
+	},
+
 	async getAll(): Promise<{
 		hero: HeroContent;
 		about: AboutContent;
@@ -108,6 +116,7 @@ export const sanityClient = {
 		contact: ContactContent;
 		footer: FooterContent;
 		navigation: NavigationItem[];
+		siteSettings: SiteSettings;
 	}> {
 		return fetchFromEdgeFunction('all');
 	},
